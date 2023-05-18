@@ -18,7 +18,9 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
-
+//using morgan
+const morgan = require('morgan');
+app.use(morgan('combined'));
 
 
 //routing
