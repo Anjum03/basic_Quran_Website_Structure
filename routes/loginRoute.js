@@ -60,32 +60,7 @@ router.post('/login', async(req,res)=>{
 });
 
 
-// //sendPasswordlink
-// router.post('/sendPasswordLink', async(req,res)=>{
-
-//     const {email} = req.body ;
-    
-//     try{
-
-//         const user = await Login.findOne({email});
-
-//         if(!user){
-//             res.status(400).json({ success : false, msg: `User Not Found`})
-//         }
-
-//         //generate jwt token 
-//         const token = jwt.sign({id:user._id}, process.env.JWT_SECRET_KEY,{ expiresIn: '180s'})
-
-//     } catch(error){
-//         console.log(error);
-//         res.status(500).json({ success: false, msg:`Server Error`})
-//     }
-
-// });
-
-
 //forgot Password
-
 // Send password reset email
 function sendResetPasswordEmail (email,token ){
     try {
@@ -143,21 +118,18 @@ try{
             //send email part
             sendResetPasswordEmail(user.email,randomString); 
 
-            res.status(200).json({ success: true, msg:`Please check your Email and Reset Password`})
+            return res.status(200).json({ success: true, msg:`Please check your Email and Reset Password`})
             
-            res.status(400).json({ success: false, msg:`User Not Found`});
+            // res.status(400).json({ success: false, msg:`User Not Found`});
         } else{ //user not exist
             res.status(400).json({ success: false, msg: `This Email Doesn't Exist . Please Login Again`})
         }
 
-        //send link on email --> click on link and redirect to enter your new paasword and redirect to home 
-//send email part 
-//done it make as a function
-
-return res.status(200).json({ success: true, msg:`Reset Password email Sent`})
-//inside email one link to add new password 
+// return res.status(200).json({ success: true, msg:`Reset Password email Sent`})
+// inside email one link to add new password 
 
     } catch(error){
+        console.log(error)
         res.status(500).json({ success: false , msg : `Server Error `})
     }
 
@@ -165,7 +137,28 @@ return res.status(200).json({ success: true, msg:`Reset Password email Sent`})
 
 
 //reset Password
-router.post('/resetPassword', async(req,res)=>{
+router.get('/resetPassword', async(req,res)=>{
+    
+    try {
+        const token = req.query.token ;
+        const tokenData = await Login.findOne({token:token});
+        if(tokenData){
+            const password = req.body.password
+
+            const newPassword = await bcrypt.hash(password,10);
+
+           const userNewPassword =  await Login.findByIdAndUpdate({ _id:tokenData._id }, { $set: {password: newPassword, token: ' '}} ,{new:true})
+           
+           res.status(200).json({ success: true, msg: `User Password has been reset `, data: userNewPassword})
+        } else{
+            res.status(400).json({ success: false, msg: `This link has expired`})
+        }
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false , msg : `Server Error `})
+        
+    }
 
 });
 
