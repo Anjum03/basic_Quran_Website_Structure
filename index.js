@@ -28,6 +28,9 @@ app.use(morgan('combined'));
 const loginRoute = require("./routes/loginRoute");
 app.use('/', loginRoute);
 
+const hidayaaRoute = require("./routes/hidayaaRoute");
+app.use('/', hidayaaRoute);
+
 
 app.listen(PORT,()=>{
     console.log(`Server is Started on PORT ${PORT}`)
