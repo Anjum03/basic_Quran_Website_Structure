@@ -10,54 +10,45 @@ const randomstring = require('randomstring');
 
 
 //Login
-router.post('/login', async(req,res)=>{
-
-    try{
-        const { email, password } = req.body;
-        if(!email || !password){
-            res.status(401).json({success: false , msg:`Please filled all the required fields` })
-        }
-        const foundUser = await Login.findOne({email} )
-
-        if(foundUser){
-            // const submitPassword = req.body.password;
-            const storedPassword = foundUser.password; 
-
-            const passwordMatch = await bcrypt.compare(password, storedPassword)
-
-            if(passwordMatch){
-                const email = foundUser.email;
-
-                const isAdmin = foundUser.role === 'admin';
-                const token = jwt.sign({id: foundUser._id}, process.env.JWT_SECRET_KEY, { expiresIn: "10d" }); 
-
-                res.status(200).json({success: true, data: foundUser, message: isAdmin ? `Admin Login Successfully` : `User Login SuccessFully :)`,  isAdmin, token,})
-            } else{
-                res.status(401).json({ success: false, msg: `Wrong password`})
-            }
-
-        }  else {
-            if(!email || !password){
-                res.status(401).json({success: false , msg:`Please filled all the required fields` })
-            }
-            const hashPassword = await bcrypt.hash(password,10);
-            const newUser = new Login({
-                email:email,
-                password:hashPassword
+router.post('/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        res.status(401).json({ success: false, msg: `Please fill in all the required fields` });
+      }
+  
+      if (email === 'admin@hidayaa.com' && password === 'hidayaa@123') {
+        const foundUser = await Login.findOne({ email });
+  
+        if (foundUser) {
+          const storedPassword = foundUser.password;
+          const passwordMatch = await bcrypt.compare(password, storedPassword);
+  
+          if (passwordMatch) {
+            const token = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET_KEY, { expiresIn: '10d' });
+  
+            res.status(200).json({
+              success: true,
+              data: foundUser,
+              message: 'Login Successfully',
+              token,
             });
-
-            const isAdmin = newUser.role === 'admin';
-            const token = jwt.sign({id: newUser._id},process.env.JWT_SECRET_KEY,{  expiresIn: "10d" } )
-
-            await newUser.save();
-            res.status(200).json({success: true, data: newUser, message: isAdmin ? `Admin Login Successfully` : ` New User Login SuccessFully :)`,  isAdmin, token,})
+          } else {
+            res.status(401).json({ success: false, msg: 'Wrong password' });
+          }
+        } else {
+          res.status(401).json({ success: false, msg: 'User not found' });
         }
-
-    } catch(error){
-        console.log(error)
-        res.status(500).json({ success: false, msg: `Server Error`})
+      } else {
+        res.status(401).json({ success: false, msg: 'Invalid email or password' });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ success: false, msg: 'Server Error' });
     }
-});
+  });
+  
+  
 
 
 //forgot Password
@@ -165,40 +156,40 @@ router.get('/resetPassword', async(req,res)=>{
 
 
 //change password
-router.post('/changePassword', async(req,res)=>{
+// router.post('/changePassword', async(req,res)=>{
 
-    const {email, newPassword, oldPassword} = req.body ;
+//     const {email, newPassword, oldPassword} = req.body ;
 
-    try{
+//     try{
 
-        const user = await Login.findOne({email});
+//         const user = await Login.findOne({email});
 
-        if(!user){
-            return res.status(400).json({ success: false, msg: `User Not Found`});
-        }
+//         if(!user){
+//             return res.status(400).json({ success: false, msg: `User Not Found`});
+//         }
 
-        const isMatch = await bcrypt.compare (oldPassword, user.password)
-        if(!isMatch){
-            return res.status(401).json({ success: false , msg: `Your Old Password is Wrong !!!`})
-        } else{
+//         const isMatch = await bcrypt.compare (oldPassword, user.password)
+//         if(!isMatch){
+//             return res.status(401).json({ success: false , msg: `Your Old Password is Wrong !!!`})
+//         } else{
 
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(newPassword, salt);
-            user.password = hashedPassword ;
-            await user.save();
-            return res.status(200).json({ success: true, message: 'Password changed successfully!' });
-        }
+//             const salt = await bcrypt.genSalt(10);
+//             const hashedPassword = await bcrypt.hash(newPassword, salt);
+//             user.password = hashedPassword ;
+//             await user.save();
+//             return res.status(200).json({ success: true, message: 'Password changed successfully!' });
+//         }
 
-        // const code = crypto.randomBytes(20).toString('hex');
+//         // const code = crypto.randomBytes(20).toString('hex');
 
-        //update the user's [Password and clear the forgotPasswordCode in DB]
+//         //update the user's [Password and clear the forgotPasswordCode in DB]
 
-    } catch (error){
-        console.log(error);
-        return res.status(500).json({ success: false, msg:`Server Error`})
-    }
+//     } catch (error){
+//         console.log(error);
+//         return res.status(500).json({ success: false, msg:`Server Error`})
+//     }
 
-});
+// });
 
 
 // logout

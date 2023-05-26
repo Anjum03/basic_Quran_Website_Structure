@@ -7,6 +7,32 @@ const data = require('../data.json');
 const QuranAudioModel = require('../model/QuranAudioModel');
 
 // to get all surahName and Ayat No  // first Page
+
+      router.get('/QuranAudio/Dummy', async(req,res)=>{
+
+        try{
+    
+            const dummyData = await QuranAudio.insertMany(data);
+
+             // Extract only the required data (surahName and Ayat No) from allQuranAudio
+    // const extractedData = dummyData.map(item => {
+    //     return {
+    //     //   surahName: item.surahName,
+    //     //   totalAyah: item.totalAyah,
+    //       text: item.text,
+    //       audio: item.audio
+    //     };
+    //   });
+            
+            return res.status(200).json({ success: true, msg: ` All Surah list  `, data: dummyData });
+    
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ success: false, msg: `Server Error ` })
+        }
+    
+    });
+
 router.get('/QuranAudio/AllData', async(req,res)=>{
 
     try{
@@ -15,20 +41,9 @@ router.get('/QuranAudio/AllData', async(req,res)=>{
 
         if(allQuranAudio.length === 0){
             //i use dummy data but change when xls file comes
-            // allQuranAudio = await QuranAudio.find();
-            const dummyData = await QuranAudio.insertMany(data);
+            // allQuranAudio = await QuranAudio.find()
 
-             // Extract only the required data (surahName and Ayat No) from allQuranAudio
-    const extractedData = dummyData.map(item => {
-        return {
-        //   surahName: item.surahName,
-        //   totalAyah: item.totalAyah,
-          text: item.text,
-          audio: item.audio
-        };
-      });
-
-            return res.status(400).json({ success:  false, msg: ` No Quran Audio list  `, data:  extractedData});
+            return res.status(400).json({ success:  false, msg: ` No Quran Audio list  `,});
         }
         const extractedData = allQuranAudio.map(item => {
             return {

@@ -9,7 +9,7 @@ const hidayaaSchema = new mongoose.Schema({
         },
         ayahDetails: [
           {
-            ayahWord: String,
+            ayahWord: String , 
             hidayaText: String,
             hidayaaAudio: String,
             hidayaaTag: {

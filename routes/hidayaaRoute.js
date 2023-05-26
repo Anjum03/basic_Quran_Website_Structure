@@ -3,7 +3,23 @@
 require('dotenv').config();
 const router = require('express').Router();
 const Hidayaa = require('../model/hidayaModel');
+const data = require('../data.json');
 
+//get all surah list
+//publish part is remaining
+router.get('/all/surahList', async(req,res)=>{
+
+    try {
+       
+        const dummyData = await Hidayaa.insertMany(data);
+    
+        res.status(200).json({ success: true, msg: 'SurahList', hidayaData: dummyData });
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, msg: 'Server Error' });
+      }
+
+})
 
 
 // router.post('/hidayas', async (req, res) => {
