@@ -31,6 +31,8 @@ app.use('/', loginRoute);
 const hidayaaRoute = require("./routes/hidayaaRoute");
 app.use('/', hidayaaRoute);
 
+const QuranAudioRoute = require("./routes/QuranAudioRoute");
+app.use('/', QuranAudioRoute);
 
 app.listen(PORT,()=>{
     console.log(`Server is Started on PORT ${PORT}`)
