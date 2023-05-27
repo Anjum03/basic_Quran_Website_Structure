@@ -13,35 +13,26 @@ const randomstring = require('randomstring');
 router.post('/login', async (req, res) => {
     try {
       const { email, password } = req.body;
+      
       if (!email || !password) {
         res.status(401).json({ success: false, msg: `Please fill in all the required fields` });
       }
+      
+      const foundUser = await Login.findOne({ email });
+
+      if(!foundUser){
+        return res.status(404).json({ success: false, message: 'Admin Not Found'
+
+      });
+    }
+
+    const passwordMatch = await bcrypt.compare(password , foundUser.password);
+    if(!passwordMatch){
+        return res.status(400).json({ success: false, message: 'Invalid Password' });
+    }  const token = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET_KEY,{ expiresIn: "8d" });
+    res.status(200).json({ success: true, data: foundUser,message: 'Login Successfully', token, });
   
-      if (email === 'admin@hidayaa.com' && password === 'hidayaa@123') {
-        const foundUser = await Login.findOne({ email });
   
-        if (foundUser) {
-          const storedPassword = foundUser.password;
-          const passwordMatch = await bcrypt.compare(password, storedPassword);
-  
-          if (passwordMatch) {
-            const token = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET_KEY, { expiresIn: '10d' });
-  
-            res.status(200).json({
-              success: true,
-              data: foundUser,
-              message: 'Login Successfully',
-              token,
-            });
-          } else {
-            res.status(401).json({ success: false, msg: 'Wrong password' });
-          }
-        } else {
-          res.status(401).json({ success: false, msg: 'User not found' });
-        }
-      } else {
-        res.status(401).json({ success: false, msg: 'Invalid email or password' });
-      }
     } catch (error) {
       console.log(error);
       res.status(500).json({ success: false, msg: 'Server Error' });
