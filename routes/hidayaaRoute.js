@@ -8,61 +8,33 @@ const data = require('../data.json');
 //get all surah list
 //publish part is remaining
 
-router.get('/all/surahList', async (req, res) => {
+router.get('/all/surahList', async (rseq, res) => {
   try {
-    const surahs = await Promise.all(
-        data.map(async (item) => {
-          const hidayasCount = await Hidayaa.countDocuments({ surahName: item.transliteration });
-          return {
-            surahName: item.transliteration,
-            hidayasCount,
-          };
-        })
-      );
-    res.status(200).json({ success: true, msg: 'SurahList', hidayaData: surahs });
+  
+    const surahs = data.map((item) => {
+      return {
+        id: item.id,
+        surahName: item.transliteration,
+        hidayasCount: 0,
+        hidayas: [] // Initialize the array
+      };
+    });
+
+    for (const surah of surahs) {
+      const hidayas = await Hidayaa.find({ surahName: surah.surahName });
+      surah.hidayasCount = hidayas.length;
+      surah.hidayas = hidayas.map((hidaya) => hidaya._id);
+    }
+    res.status(200).json({ success: true, msg: 'Surah Details', surahData: surahs });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, msg: 'Server Error' });
   }
 });
 
+
 module.exports = router;
 
-
-// router.post('/hidayas', async (req, res) => {
-
-//     try {
-
-//         const { surahName, hidayaaNumber, ayah } = req.body;
-//         const hidayaData = await Hidayaa.create({ //list page render
-//             surahName, //it comes from surahList 
-//             hidayaaNumber, //  particular surah m jitne hidaya present honge
-//             ayah: ayah ||  [], //ayah comest from ayah List
-//         });
-
-//         if(surahName && hidayaaNumber){
-//             hidayaaResponse = `Surah Name and Hidayaa Number is added `
-//         }  else if(surahName  ){
-//             hidayaaResponse =   `Surah Name is added `;
-//         } else if(hidayaaNumber){
-//             hidayaaResponse =  `Hidayaa Number is added `;
-//         } else if(ayah){
-//             hidayaaResponse =  `Ayah is added `;
-//         } else{
-//             hidayaaResponse = `Surah Name, Hidayaa Number and Ayah is added `
-//         }
-
-//         res.status(200).json({ success: true, msg: hidayaaResponse, data: hidayaData })
-
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ success: false, msg: `Server Error ` })
-//     }
-
-
-// });
-
-// Add new hidaya to a specific surah
 
 // Add new hidaya to a specific surah
 router.post('/surahs/:surahName/hidayas', async (req, res) => {
