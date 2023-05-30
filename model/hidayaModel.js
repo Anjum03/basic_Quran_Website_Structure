@@ -4,41 +4,49 @@ const mongoose = require('mongoose');
 
 const hidayaaSchema = new mongoose.Schema({
 
-        ayahNumber: {
-          type: Number,
+  surahName: String,
+  ayah :[ {
+
+    ayahNumber: {
+      type: Number,
+    },
+    ayahDetails: [
+      {
+        ayahWord: String,
+        hidayaText: String,
+        hidayaaAudio: String,
+        hidayaaTag: {
+          type: String,
+          enum: ['No-Tag', 'Tag'],
+          default: 'No-Tag',
         },
-        ayahDetails: [
-          {
-            ayahWord: String , 
-            hidayaText: String,
-            hidayaaAudio: String,
-            hidayaaTag: {
-              type: String,
-              enum: ['No-Tag', 'Tag'],
-              default: 'No-Tag',
-            },
-          },
-        ],
-    
-      
+      },
+    ],
+  }
+  ],
+  
+  bookmark: {
+    type: String
+  }
 
-    // surahName : String,
-    // hidayaaNumber : Number, //automaticall num catch from db
 
-    // ayah:[
-    //     {
-    // ayahNumber: {
-    //     type: Number,
-    //     ayahDetails : [{
-    //         ayahWord: String,
-    //         hidayaText: String,
-    //         hidayaaAudio: String,
-    //         hidayaaTag: { type: String, enum: ['No-Tag', 'Tag'], default: 'No-Tag' }
-    //     }]
-    // }
-    //create array of object 
-    //     }
-    // ]
+
+  // hidayaaNumber : Number, //automaticall num catch from db
+
+  // ayah:[
+  //     {
+  // ayahNumber: {
+  //     type: Number,
+  //     ayahDetails : [{
+  //         ayahWord: String,
+  //         hidayaText: String,
+  //         hidayaaAudio: String,
+  //         hidayaaTag: { type: String, enum: ['No-Tag', 'Tag'], default: 'No-Tag' }
+  //     }]
+  // }
+  //create array of object 
+  //     }
+  // ]
 
 }, { timestamps: true })
 
