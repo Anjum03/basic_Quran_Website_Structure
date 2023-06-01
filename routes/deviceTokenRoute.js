@@ -97,6 +97,44 @@ router.delete('/addToken/:deviceTokenId', async (req, res) => {
 
 
 
+//get all
+router.get('/addToken/all', async (req, res) => {
+    try {
+
+        const existDeviceToken = await DeviceToken.find();
+
+        if (!existDeviceToken) {
+            return res.status(404).json({ success: false, msg: 'Device Token Not found' });
+        }
+
+        return res.status(200).json({ success: true, msg: 'Device Token Data Successfully .. :)', data: existDeviceToken, });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, msg: 'Server Error' });
+    }
+});
+
+
+
+//get by id
+router.get('/addToken/:deviceTokenId', async (req, res) => {
+    try {
+
+        const { deviceTokenId } = req.params;
+
+        const existDeviceToken = await DeviceToken.findById(deviceTokenId );
+
+        if (!existDeviceToken) {
+            return res.status(404).json({ success: false, msg: 'Device Token Not found' });
+        }
+
+        return res.status(200).json({ success: true, msg: 'Device Token One Data Successfully .. :)', data: existDeviceToken, });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, msg: 'Server Error' });
+    }
+});
+
 
 
 module.exports = router

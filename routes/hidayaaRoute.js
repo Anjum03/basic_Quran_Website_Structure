@@ -59,11 +59,7 @@ router.post('/surahs/:dataId/hidayas', async (req, res) => {
       ],
     });
 
-    res.status(200).json({
-      success: true,
-      msg: 'New hidaya is created',
-      newHidaya,
-    });
+    res.status(200).json({   success: true,msg: 'New hidaya is created', data : dataId ,  newHidaya,});
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, msg: 'Server Error' });
@@ -77,14 +73,14 @@ router.post('/surahs/:dataId/hidayas', async (req, res) => {
   
   
 //update hidaya
-router.put('/surahs/:surahName/hidayas/:hidayaId', async (req, res) => {
+router.put('/surahs/:dataId/hidayas/:hidayaId', async (req, res) => {
   try {
-    const surahName = req.params.surahName;
+    const dataId = req.params.dataId;
     const hidayaId = req.params.hidayaId;
     const { ayahNumber, ayahDetails } = req.body;
 
     // Find the Surah by surahName in the data from data.json
-    const surah = data.find((item) => item.transliteration === surahName);
+    const surah = await DataJson.findById(dataId);
 
     if (!surah) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
@@ -98,9 +94,9 @@ router.put('/surahs/:surahName/hidayas/:hidayaId', async (req, res) => {
     }
 
     // Update the hidaya fields
-    hidaya.surahName = surahName;
-    hidaya.ayah[0].ayahNumber = ayahNumber;
-    hidaya.ayah[0].ayahDetails = ayahDetails
+    hidaya.surahName = surah.transliteration;
+    hidaya.ayah[0].ayahNumber = parseInt(ayahNumber);
+    hidaya.ayah[0].ayahDetails = ayahDetails;
 
     // Save the updated hidaya
     const updatedHidaya = await hidaya.save();
@@ -116,18 +112,19 @@ router.put('/surahs/:surahName/hidayas/:hidayaId', async (req, res) => {
   }
 });
 
+
   
 
 
 
 //delete hidayaa
-router.delete('/surahs/:surahName/hidayas/:hidayaId', async (req, res) => {
+router.delete('/surahs/:dataId/hidayas/:hidayaId', async (req, res) => {
     try {
-      const surahName = req.params.surahName;
+      const dataId = req.params.dataId;
       const hidayaId = req.params.hidayaId;
   
       // Find the Surah by surahName in the data from data.json
-      const surah = data.find((item) => item.transliteration === surahName);
+      const surah = await DataJson.findById(dataId);
   
       if (!surah) {
         return res.status(404).json({ success: false, msg: 'Surah not found' });
