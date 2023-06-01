@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 
 const hidayaaSchema = new mongoose.Schema({
-
+  // dataId : [ { type: mongoose.Schema.Types.ObjectId, ref: 'DataJson'}],
   surahName: String,
   ayah :[ {
 
@@ -24,12 +24,6 @@ const hidayaaSchema = new mongoose.Schema({
     ],
   }
   ],
-  
-  bookmark: {
-    type: String
-  }
-
-
 
   // hidayaaNumber : Number, //automaticall num catch from db
 

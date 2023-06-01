@@ -12,6 +12,7 @@ router.get('/all/AyahList', async (req, res) => {
            // Find the Surah by surahName in the data from data.json
            const surah = data.map((item) =>{
              return{
+                id: item.id,
                 surahName : item.transliteration,
                 ayahCount : item.total_verses
              }
@@ -55,13 +56,13 @@ router.get('/quranAudio/:surahName/:ayahNumber/audio/:audioId', async (req, res)
         const oneQuranAudio = req.params.audioId;
         // Find the Surah by surahName in the data from data.json
         const surah = data.find((item) => item.transliteration === surahName);
-        const ayahNum = data.find((item) => item.transliteration === ayahNumber);
 
         if (!surah) {
             return res.status(404).json({ success: false, msg: 'Surah not found' });
         }
-        if (!ayahNum) {
-            return res.status(404).json({ success: false, msg: 'ayahNumber not found' });
+        const verse = data.find((item) => item.total_verses === ayahNumber);
+        if (!verse) {
+            return res.status(400).json({ success: false, msg: 'Ayah Number Not Found' });
         }
         const singleQuranAudio = await QuranAudio.findById(oneQuranAudio);
         if (!oneQuranAudio) {
@@ -108,8 +109,9 @@ router.post('/quranAudio/:surahName/:ayahNumber/audio', async (req, res) => {
         return res.status(404).json({ success: false, msg: 'Surah not found' });
       }
   
-      if (ayahNumber < 1 || ayahNumber > surah.total_verses) {
-        return res.status(404).json({ success: false, msg: 'Invalid ayahNumber' });
+      const verse = data.find((item) => item.total_verses === ayahNumber);
+      if (!verse) {
+          return res.status(400).json({ success: false, msg: 'Ayah Number Not Found' });
       }
   
       const audioList = await QuranAudio.create({
@@ -152,9 +154,10 @@ router.put('/quranAudio/:surahName/:ayahNumber/audio/:audioId', async (req, res)
         return res.status(404).json({ success: false, msg: 'Surah not found' });
       }
   
-      if (ayahNumber < 1 || ayahNumber > surah.total_verses) {
-        return res.status(404).json({ success: false, msg: 'Invalid ayahNumber' });
-      }
+      const verse = data.find((item) => item.total_verses === ayahNumber);
+        if (!verse) {
+            return res.status(400).json({ success: false, msg: 'Ayah Number Not Found' });
+        }
   
       const audioFind = await QuranAudio.findById(audioId, );
   
@@ -195,8 +198,9 @@ router.delete('/quranAudio/:surahName/:ayahNumber/audio/:audioId', async (req, r
         if (!surah) {
             return res.status(404).json({ success: false, msg: 'Surah not found' });
         }
-        if (ayahNumber < 1 || ayahNumber > surah.total_verses) {
-          return res.status(404).json({ success: false, msg: 'Invalid ayahNumber' });
+        const verse = data.find((item) => item.total_verses === ayahNumber);
+        if (!verse) {
+            return res.status(400).json({ success: false, msg: 'Ayah Number Not Found' });
         }
 
         const audioFind = await QuranAudio.findByIdAndDelete(audioId);

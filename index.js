@@ -34,6 +34,15 @@ app.use('/', hidayaaRoute);
 const QuranAudioRoute = require("./routes/QuranAudioRoute");
 app.use('/', QuranAudioRoute);
 
+const BookmarkRoute = require("./routes/bookmarkRoute");
+app.use('/', BookmarkRoute);
+
+const DeviceTokenRoute = require("./routes/deviceTokenRoute");
+app.use('/', DeviceTokenRoute);
+
+const DataJsonRoute = require("./routes/dataJsonRoute");
+app.use('/', DataJsonRoute);
+
 app.listen(PORT,()=>{
     console.log(`Server is Started on PORT ${PORT}`)
 })
