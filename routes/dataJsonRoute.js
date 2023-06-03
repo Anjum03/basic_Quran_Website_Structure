@@ -60,7 +60,7 @@ router.post('/addData', async (req, res) => {
             },
             {"id":9,
               "surahName": "التوبة",
-              "transliteration": "At-Tawbah",
+              "transliteration": "Al-Tawbah",
               "translation": "The Repentance",
               "total_verses": 129
             },

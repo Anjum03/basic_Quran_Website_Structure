@@ -7,30 +7,49 @@ const DataJson = require('../model/dataModel');
 
 //get all surah list
 //publish part is remaining
+router.get('/all/surahList', async(req, res)=>{
 
-router.get('/all/surahList', async (rseq, res) => {
-  try {
-  
-    const surahs = data.map((item) => {
-      return {
-        id: item.id,
-        surahName: item.transliteration,
-        hidayasCount: 0,
-        // hidayas: [] // Initialize the array
-      };
-    });
-
-    for (const surah of surahs) {
-      const hidayas = await Hidayaa.find({ surahName: surah.surahName });
-      surah.hidayasCount = hidayas.length;
-      // surah.hidayas = hidayas.map((hidaya) => hidaya._id);
+  const surahs = DataJson.map( (item) =>{
+    return {
+      _id : item._id,
+      surahName : item.transliteration,
+      hidayasCount : 0 ,
     }
-    res.status(200).json({ success: true, msg: 'Surah Details', surahData: surahs });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, msg: 'Server Error' });
-  }
+  });
+  // for (const surah of surahs) {
+    //       const hidayas = await Hidayaa.find({ surahName: surah.surahName });
+    //       surah.hidayasCount = hidayas.length;
+    //       // surah.hidayas = hidayas.map((hidaya) => hidaya._id);
+    //     }
+        res.status(200).json({ success: true, msg: 'Surah Details', surahData: surahs });
+    
+
 });
+
+// router.get('/all/surahList', async (rseq, res) => {
+//   try {
+  
+//     const surahs = data.map((item) => {
+//       return {
+//         id: item.id,
+//         surahName: item.transliteration,
+//         hidayasCount: 0,
+//         // hidayas: [] // Initialize the array
+//       };
+//     });
+
+//     for (const surah of surahs) {
+//       const hidayas = await Hidayaa.find({ surahName: surah.surahName });
+//       surah.hidayasCount = hidayas.length;
+//       // surah.hidayas = hidayas.map((hidaya) => hidaya._id);
+//     }
+//     res.status(200).json({ success: true, msg: 'Surah Details', surahData: surahs });
+
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ success: false, msg: 'Server Error' });
+//   }
+// });
 
 
 
@@ -113,9 +132,6 @@ router.put('/surahs/:dataId/hidayas/:hidayaId', async (req, res) => {
 });
 
 
-  
-
-
 
 //delete hidayaa
 router.delete('/surahs/:dataId/hidayas/:hidayaId', async (req, res) => {
@@ -156,10 +172,17 @@ router.delete('/surahs/:dataId/hidayas/:hidayaId', async (req, res) => {
 
 
 //all surah,ayah, and hidayaa
-router.get('/surahs/hidayas/:surahId', async (req, res) => {
+router.get('/surahs/hidayas/:dataId', async (req, res) => {
 
   try {
-    const surahId = req.params.surahId ; 
+    const dataId = req.params.dataId ; 
+
+     // Find the Surah by surahName in the data from data.json
+     const surah = await DataJson.findById(dataId);
+  
+     if (!surah) {
+       return res.status(404).json({ success: false, msg: 'Surah not found' });
+     }
       const allHidayaa = await Hidayaa.find()
 
       if (allHidayaa.length === 0) {
@@ -173,12 +196,6 @@ router.get('/surahs/hidayas/:surahId', async (req, res) => {
   }
 
 })
-
-
-
-
-
-
 
 
 

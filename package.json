@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "homepage": "http://99.79.64.2:3001/dev/api/",
   "scripts": {
     "start": "nodemon index",
     "test": "echo \"Error: no test specified\" && exit 1"
