@@ -4,27 +4,79 @@ require('dotenv').config();
 const router = require('express').Router();
 const Hidayaa = require('../model/hidayaModel');
 const DataJson = require('../model/dataModel');
+const data = require('../data.json')
 
 //get all surah list
 //publish part is remaining
-router.get('/all/surahList', async(req, res)=>{
+// router.get('/all/surahList', async(req, res)=>{
 
-  const surahs = DataJson.map( (item) =>{
-    return {
-      _id : item._id,
-      surahName : item.transliteration,
-      hidayasCount : 0 ,
-    }
-  });
-  // for (const surah of surahs) {
-    //       const hidayas = await Hidayaa.find({ surahName: surah.surahName });
-    //       surah.hidayasCount = hidayas.length;
-    //       // surah.hidayas = hidayas.map((hidaya) => hidaya._id);
-    //     }
-        res.status(200).json({ success: true, msg: 'Surah Details', surahData: surahs });
+//   const surahs = DataJson.map( (item) =>{
+//     return {
+//       _id : item._id,
+//       surahName : item.transliteration,
+//       hidayasCount : 0 ,
+
+//     }
+//   });
+//   // for (const surah of surahs) {
+//     //       const hidayas = await Hidayaa.find({ surahName: surah.surahName });
+//     //       surah.hidayasCount = hidayas.length;
+//     //       // surah.hidayas = hidayas.map((hidaya) => hidaya._id);
+//     //     }
+//         res.status(200).json({ success: true, msg: 'Surah Details', surahData: surahs });
     
 
+// });
+
+router.get('/all/surahList', async (req, res) => {
+  try {
+    const surahs = await DataJson.find({}, { _id: 1, transliteration: 1  , });
+    for (const surah of surahs) {
+      const hidayas = await Hidayaa.find({ surahName: surah.transliteration });
+      surah.hidayasCount = hidayas.length;
+      // surah.hidayas = hidayas.map((hidaya) => hidaya._id);
+    }
+    // const surahs =
+      // DataJson.map((item) => {
+      //   return {
+      //     _id: item._id,
+      //     surahName: item.transliteration,
+      //     // hidayasCount: hidayas.length,
+      //     hidayasCount: 0,
+      //   };
+      // })
+    // );
+
+
+
+res.status(200).json({ success: true, msg: 'Surah Details', surahData: surahs });
+
+} catch (error) {
+console.log(error);
+res.status(500).json({ success: false, msg: 'Server Error' });
+}
 });
+; // Import your Mongoose model
+
+// router.get('/all/surahList', async (req, res) => {
+//   try {
+//     const surahs = await YourModel.find({}, { _id: 1, transliteration: 1 });
+
+//     for (const surah of surahs) {
+//       const hidayas = await Hidayaa.find({ surahName: surah.transliteration });
+//       surah.hidayasCount = hidayas.length;
+//       // surah.hidayas = hidayas.map((hidaya) => hidaya._id);
+//     }
+
+//     res.status(200).json({ success: true, msg: 'Surah Details', surahData: surahs });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ success: false, msg: 'Server Error' });
+//   }
+// });
+
+
+
 
 // router.get('/all/surahList', async (rseq, res) => {
 //   try {
