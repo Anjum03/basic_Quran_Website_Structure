@@ -6,7 +6,7 @@ const dataJsonSchema = new mongoose.Schema({
     surahName : String,
     transliteration : String,
     translation : String,
-    ayahNumber : Number 
+    total_verses : Number 
 
 
 

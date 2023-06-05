@@ -6,7 +6,6 @@ const quranAudioSchema = new mongoose.Schema({
     surahName: String,
   ayah :[
      {
-
     ayahNumber: {
       type: Number,
     },
