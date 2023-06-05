@@ -4,7 +4,6 @@ require('dotenv').config();
 const router = require('express').Router();
 const Hidayaa = require('../model/hidayaModel');
 const DataJson = require('../model/dataModel');
-const data = require('../data.json')
 
 //get all surah list
 // GET request to retrieve surah data including hidayas
@@ -44,6 +43,39 @@ router.get('/all/surahList', async (req, res) => {
     res.status(500).json({ success: false, msg: 'Server Error' });
   }
 });
+
+// router.get('/all/surahList', async (req, res) => {
+//   try {
+//     // Find all surahs from the DataJson collection
+//     const surahs = await DataJson.find({}, { _id: 1, transliteration: 1 });
+
+//     if (!surahs) {
+//       return res.status(404).json({ success: false, msg: 'Surah not found' });
+//     }
+
+//     const ayahs = await Promise.all(
+//       surahs.map(async (surah) => {
+//         const ayahs = await QuranAudio.find({ surahName: surah.transliteration });
+//         return ayahs;
+//       })
+//     );
+
+//     // Create the response data with surah details and their associated ayahs
+//     const surahData = surahs.map((surah, index) => {
+//       return {
+//         _id: surah._id,
+//         surahName: surah.transliteration,
+//         ayahCount: ayahs[index].length,
+//         ayahs: ayahs[index],
+//       };
+//     });
+
+//     res.status(200).json({ success: true, msg: 'SurahList with Ayah', hidayaData: surahData });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ success: false, msg: 'Server Error' });
+//   }
+// });
 
 
 

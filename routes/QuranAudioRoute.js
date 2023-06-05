@@ -2,27 +2,48 @@
 
 require('dotenv').config();
 const router = require('express').Router();
+const Hidayaa = require('../model/hidayaModel');
 const QuranAudio = require('../model/QuranAudioModel');
-const data = require('../data.json');
+const DataJson = require('../model/dataModel');
 
 // to get all surahName and Ayat No  // first Page
 
 router.get('/all/AyahList', async (req, res) => {
     try {
            // Find the Surah by surahName in the data from data.json
-           const surah = data.map((item) =>{
+           const surahs = await DataJson.find({},{ _id: 1, transliteration: 1  , });
+
+           if (!surahs) {
+            return res.status(404).json({ success: false, msg: 'Surah not found' });
+          }
+
+          const ayahs = await Promise.all(
+            surahs.map(async  (surah) => {
+              const ayahs = await QuranAudio.find({
+                surahName : surah.transliteration
+              });
+              return ayahs ;
+            })
+          )
+
+           const surahData = surahs.map((surah , index) =>{
              return{
-                id: item.id,
-                surahName : item.transliteration,
-                ayahCount : item.total_verses
-             }
-           })
-        res.status(200).json({ success: true, msg: 'SurahList with Ayah', hidayaData: surah });
+                _id: surah._id,
+                surahName : surah.transliteration,
+                // ayahCount : surah.total_verses,
+                // ayahs: ayahs[index].map((ayah)=> ayahs[index]),
+                ayahCount : ayahs,
+                ayahs: ayahs[index],
+             };
+           });
+        res.status(200).json({ success: true, msg: 'SurahList with Ayah', hidayaData: surahData });
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, msg: 'Server Error' });
     }
 });
+
+
 
 
 //second page // all dat of audios 
@@ -96,26 +117,26 @@ router.get('/quranAudio/:surahName/:ayahNumber/audio/:audioId', async (req, res)
 
 
 //add new audio QuranAudio
-router.post('/quranAudio/:surahName/:ayahNumber/audio', async (req, res) => {
+router.post('/quranAudio/:dataId/:ayahNumber/audio', async (req, res) => {
     try {
-      const surahName = req.params.surahName;
+      const dataId = req.params.dataId;
       const ayahNumber = parseInt(req.params.ayahNumber);
       const { text, audio } = req.body;
   
       // Find the Surah by surahName in the data from data.json
-      const surah = data.find((item) => item.transliteration === surahName);
+      const surah = DataJson.findById(dataId);
   
       if (!surah) {
         return res.status(404).json({ success: false, msg: 'Surah not found' });
       }
-  
-      const verse = data.find((item) => item.total_verses === ayahNumber);
+    
+      const verse = DataJson.findById(dataId.total_verses)
       if (!verse) {
           return res.status(400).json({ success: false, msg: 'Ayah Number Not Found' });
       }
   
       const audioList = await QuranAudio.create({
-        surahName,
+        surahName: surah.transliteration,
         ayah: [
           {
             ayahNumber,
