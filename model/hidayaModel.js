@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 const hidayaaSchema = new mongoose.Schema({
   // dataId : [ { type: mongoose.Schema.Types.ObjectId, ref: 'DataJson'}],
   surahName: String,
-  ayah :[ {
-
+  ayah :[ 
+    {
     ayahNumber: {
       type: Number,
     },
