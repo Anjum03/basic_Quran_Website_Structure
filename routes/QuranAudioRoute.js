@@ -11,7 +11,7 @@ const DataJson = require('../model/dataModel');
 router.get('/all/AyahList', async (req, res) => {
     try {
            // Find the Surah by surahName in the data from data.json
-           const surahs = await DataJson.find({},{ _id: 1, transliteration: 1  , });
+           const surahs = await DataJson.find({},{ _id: 1, transliteration: 1  , total_verses : 1});
 
            if (!surahs) {
             return res.status(404).json({ success: false, msg: 'Surah not found' });
@@ -20,7 +20,8 @@ router.get('/all/AyahList', async (req, res) => {
           const ayahs = await Promise.all(
             surahs.map(async  (surah) => {
               const ayahs = await QuranAudio.find({
-                surahName : surah.transliteration
+                surahName : surah.transliteration,
+                // ayahNumber : surah.total_verses
               });
               return ayahs ;
             })
@@ -30,9 +31,9 @@ router.get('/all/AyahList', async (req, res) => {
              return{
                 _id: surah._id,
                 surahName : surah.transliteration,
-                // ayahCount : surah.total_verses,
+                ayahCount : surah.total_verses,
                 // ayahs: ayahs[index].map((ayah)=> ayahs[index]),
-                ayahCount : ayahs,
+                // ayahCount : ayahNumber,
                 ayahs: ayahs[index],
              };
            });

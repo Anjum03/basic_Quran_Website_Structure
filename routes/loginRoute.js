@@ -9,6 +9,44 @@ const nodemailer = require('nodemailer');
 const randomstring = require('randomstring');
 
 
+//register
+// router.post('/register', async (req, res) => {
+//     try {
+
+//         const { email, password,  } = req.body;
+
+//         const userExists = await Login.findOne({ email });
+
+//         if (password.length < 8) {
+//             return res.status(400).json({ message: "Password less than 8 characters" })
+//         }
+
+//         if (userExists) {
+//             res.status(400).json({ success: false, error: 'Email already registered' });
+//             return;
+//         }
+
+//         const salt = await bcrypt.genSalt(10);
+//         const hashedPassword = await bcrypt.hash(password, salt);
+
+//         const user = await Login.create({  email,password: hashedPassword,});
+//         // const isAdmin = user.role === 'admin'; // check if the user is an admin
+
+//         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: "8d" });
+    
+//         res.status(200).json({
+//           success: true,
+//           token,
+//         //   isAdmin,
+//           message: 'Admin logged in successfully' 
+//         //   isAdmin ? 'Admin logged in successfully' : 'User logged in successfully',
+//         });
+//       } catch (error) {
+//         res.status(500).json({ success: false, error: 'Server error' });
+//       }
+// });
+
+
 //Login
 router.post('/login', async (req, res) => {
     try {
