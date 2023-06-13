@@ -4,6 +4,12 @@ require('dotenv').config();
 const router = require('express').Router();
 const Hidayaa = require('../model/hidayaModel');
 const DataJson = require('../model/dataModel');
+const multer = require('multer');
+
+const storage = multer.memoryStorage(); //Store files in memory instead of saving them to disk
+const upload = multer ({
+  storage : storage 
+});
 
 //get all surah list
 // GET request to retrieve surah data including hidayas
@@ -15,29 +21,27 @@ router.get('/all/surahList', async (req, res) => {
   try {
 
     // Find the Surah by dataId in the data from data.json
-    const surahs = await DataJson.find({},{ _id: 1, transliteration: 1  , });
+    const surahs = await DataJson.find({}, { _id: 1, transliteration: 1, });
 
     if (!surahs) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
 
-    const hidayas = await Promise.all(
-      surahs.map(async (surah) => {
-        const hidayas = await Hidayaa.find({ surahName: surah.transliteration });
-        return hidayas;
+    const responseData = await Promise.all(
+      surahs.map(async (surah)=>{
+        const hidayas = await Hidayaa.find({
+          dataId : surah._id});
+          return{
+            surahName : surah.transliteration,
+            hidayaCount : hidayas.length , 
+            hidayas : hidayas.map((hidaya) => hidaya)
+          }
       })
-    );
+    )
     // Find hidayas associated with the surah
-    const responseData = surahs.map((surah, index) => {
-      return {
-        _id: surah._id,
-        surahName: surah.transliteration,
-        hidayasCount: hidayas[index].length,
-        hidayas: hidayas[index].map((hidaya) => hidayas[index]),
-      };
-    });
     
-    res.status(200).json({ success: true, msg: 'Surah Details', surahData:responseData, });
+
+    res.status(200).json({ success: true, msg: 'Surah Details', surahData: responseData, });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, msg: 'Server Error' });
@@ -47,10 +51,16 @@ router.get('/all/surahList', async (req, res) => {
 
 
 // Add new hidaya to a specific surah
-router.post('/surahs/:dataId/hidayas', async (req, res) => {
+
+router.post('/surahs/:dataId/hidayas', upload.single('hidayaaAudio'), async (req, res) => {
+  
+  const { ayahNumber, ayahWord, hidayaText } = req.body;
+  
+
+  const file = req.file;
+
   try {
     const dataId = req.params.dataId;
-    const { ayahNumber, ayahDetails } = req.body;
 
     // Find the Surah by dataId in the data from data.json
     const surah = await DataJson.findById(dataId).exec();
@@ -59,22 +69,21 @@ router.post('/surahs/:dataId/hidayas', async (req, res) => {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
 
+
     // Create a new hidaya using the Hidayaa model
     const newHidaya = await Hidayaa.create({
+      dataId:dataId,
       surahName: surah.transliteration,
-      ayah: [
-        {
-          ayahNumber: ayahNumber,
-          ayahDetails: ayahDetails,
-        },
-      ],
+      ayahNumber,
+      ayahWord,
+      hidayaText,
+      hidayaaAudio:file.originalname, 
     });
 
     res.status(200).json({
       success: true,
       msg: 'New hidaya is created',
       dataId: dataId,
-      // surahName: surah.transliteration,
       newHidaya: newHidaya,
     });
   } catch (error) {
@@ -85,13 +94,13 @@ router.post('/surahs/:dataId/hidayas', async (req, res) => {
 
 
 
-  
+
 //update hidaya
-router.put('/surahs/:dataId/hidayas/:hidayaId', async (req, res) => {
+router.put('/surahs/:dataId/hidayas/:hidayaId',upload.single('hidayaaAudio'), async (req, res) => {
   try {
     const dataId = req.params.dataId;
     const hidayaId = req.params.hidayaId;
-    const { ayahNumber, ayahDetails } = req.body;
+    const { ayahNumber, ayahWord, hidayaText } = req.body;
 
     // Find the Surah by surahName in the data from data.json
     const surah = await DataJson.findById(dataId).exec();
@@ -99,18 +108,23 @@ router.put('/surahs/:dataId/hidayas/:hidayaId', async (req, res) => {
     if (!surah) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
+    const file = req.file;
 
     // Find the hidaya by hidayaId in the Hidayaa model
-    const hidaya = await Hidayaa.findById(hidayaId);
-
+    const hidaya = await Hidayaa.findByIdAndUpdate(hidayaId, {
+      $set:{
+        ayahNumber : ayahNumber ,
+        ayahWord : ayahWord , 
+        hidayaText : hidayaText,
+        hidayaaAudio: file.originalname, 
+      }
+    }, {new : true});
+    
     if (!hidaya) {
       return res.status(404).json({ success: false, msg: 'Hidaya not found' });
     }
-
-    // Update the hidaya fields
+    
     hidaya.surahName = surah.transliteration;
-    hidaya.ayah[0].ayahNumber = parseInt(ayahNumber);
-    hidaya.ayah[0].ayahDetails = ayahDetails;
 
     // Save the updated hidaya
     const updatedHidaya = await hidaya.save();
@@ -130,58 +144,58 @@ router.put('/surahs/:dataId/hidayas/:hidayaId', async (req, res) => {
 
 //delete hidayaa
 router.delete('/surahs/:dataId/hidayas/:hidayaId', async (req, res) => {
-    try {
-      const dataId = req.params.dataId;
-      const hidayaId = req.params.hidayaId;
-  
-      // Find the Surah by surahName in the data from data.json
-      const surah = await DataJson.findById(dataId);
-  
-      if (!surah) {
-        return res.status(404).json({ success: false, msg: 'Surah not found' });
-      }
-  
-      // Find and delete the hidaya by hidayaId
-      const deletedHidaya = await Hidayaa.findByIdAndDelete(hidayaId);
-  
-      if (!deletedHidaya) {
-        return res.status(404).json({ success: false, msg: 'Hidaya not found' });
-      }
-  
-      res.status(200).json({
-        success: true,
-        msg: 'Hidaya is deleted',
-        hidaya: deletedHidaya,
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ success: false, msg: 'Server Error' });
+  try {
+    const dataId = req.params.dataId;
+    const hidayaId = req.params.hidayaId;
+
+    // Find the Surah by surahName in the data from data.json
+    const surah = await DataJson.findById(dataId);
+
+    if (!surah) {
+      return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
-  });
-  
+
+    // Find and delete the hidaya by hidayaId
+    const deletedHidaya = await Hidayaa.findByIdAndDelete(hidayaId);
+
+    if (!deletedHidaya) {
+      return res.status(404).json({ success: false, msg: 'Hidaya not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      msg: 'Hidaya is deleted',
+      hidaya: deletedHidaya,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, msg: 'Server Error' });
+  }
+});
+
 
 //all surah,ayah, and hidayaa
 router.get('/surahs/hidayas/:dataId', async (req, res) => {
 
   try {
-    const dataId = req.params.dataId ; 
+    const dataId = req.params.dataId;
 
-     // Find the Surah by surahName in the data from data.json
-     const surah = await DataJson.findById(dataId);
-  
-     if (!surah) {
-       return res.status(404).json({ success: false, msg: 'Surah not found' });
-     }
-      const allHidayaa = await Hidayaa.find({surahName:surah.transliteration})
+    // Find the Surah by surahName in the data from data.json
+    const surah = await Hidayaa.findOne({dataId : dataId});
 
-      if (allHidayaa.length === 0) {
-          return res.status(400).json({ success: false, msg: `No Data is present. Please add Data` })
-      }
-      return res.status(200).json({ success: true, msg: ` All Surah, Hidayaa and ayah `, data: allHidayaa });
+    if (!surah) {
+      return res.status(404).json({ success: false, msg: 'Surah not found' });
+    }
+    const allHidayaa = await Hidayaa.find({ surahName: surah.transliteration })
+
+    if (allHidayaa.length === 0) {
+      return res.status(400).json({ success: false, msg: `No Data is present. Please add Data` })
+    }
+    return res.status(200).json({ success: true, msg: ` All Surah, Hidayaa and ayah `, data: allHidayaa });
 
   } catch (error) {
-      console.log('Error occurred:', error);
-      return res.status(500).json({ success: false, msg: `Server Error` });
+    console.log('Error occurred:', error);
+    return res.status(500).json({ success: false, msg: `Server Error` });
   }
 
 })
@@ -193,7 +207,7 @@ router.get('/surahs/hidayas/:dataId', async (req, res) => {
 //     const surahName = req.params.surahName;
 //     const ayahNumber = req.query.ayahNumber; // Retrieve ayahNumber from query parameter
 //     const hidayaId = req.params.hidayaId;
- 
+
 //     // Find the Surah by surahName in the data from data.json
 //     const surah = data.find((item) => item.transliteration === surahName);
 //     const surahId = surah ? surah.id : null;

@@ -3,27 +3,24 @@
 const mongoose = require('mongoose');
 
 const hidayaaSchema = new mongoose.Schema({
-  // dataId : [ { type: mongoose.Schema.Types.ObjectId, ref: 'DataJson'}],
+  dataId: {
+    type: String,
+  },
   surahName: String,
-  ayah :[ 
-    {
-    ayahNumber: {
-      type: Number,
-    },
-    ayahDetails: [
-      {
-        ayahWord: String,
-        hidayaText: String,
-        hidayaaAudio: String,
-        hidayaaTag: {
-          type: String,
-          enum: ['No-Tag', 'Tag'],
-          default: 'No-Tag',
-        },
-      },
-    ],
-  }
-  ],
+
+  ayahNumber: {
+    type: Number,
+  },
+  ayahWord: String,
+  hidayaText: String,
+  hidayaaAudio: String,
+  hidayaaTag: {
+    type: String,
+    enum: ['No-Tag', 'Tag'],
+    default: 'No-Tag',
+  },
+
+
 
   // hidayaaNumber : Number, //automaticall num catch from db
 
