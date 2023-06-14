@@ -6,7 +6,6 @@ const DataJson = require('../model/dataModel');
 const Hidayaa = require('../model/hidayaModel');
 // const multer = require('multer')
 
-
 // //multer storge 
 // const storage = multer.memoryStorage(); //Store files in memory instead of saving them to disk
 // const upload = multer ({

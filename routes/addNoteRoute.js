@@ -6,7 +6,7 @@ const Note = require('../model/addNoteModel');
 const DataJson = require('../model/dataModel');
 const Hidayaa = require('../model/hidayaModel');
 
-
+//add multer in future
 //add Note
 router.post('/:surahName/:hidayaId/addNote', async (req, res) => {
 
