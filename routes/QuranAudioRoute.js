@@ -190,11 +190,11 @@ router.post('/quranAudio/:dataId/:ayahNumber/audio', upload.single('audio'), asy
       return res.status(404).json({ success: false, msg: 'Verse not found' });
     }
 
-    let audio = await QuranAudio.findOne({ _id: dataId, ayahNumber });
+    // let audio = await QuranAudio.findOne({ _id: dataId, ayahNumber });
 
-    if (audio) {
-      return res.status(200).json({ success: false, msg: 'Audio entry already exists' });
-    }
+    // if (audio) {
+    //   return res.status(200).json({ success: false, msg: 'Audio entry already exists' });
+    // }
 
     audio = await QuranAudio.create({
       dataId: dataId,

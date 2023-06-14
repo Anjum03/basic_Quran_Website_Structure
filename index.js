@@ -43,6 +43,9 @@ app.use('/', DeviceTokenRoute);
 const DataJsonRoute = require("./routes/dataJsonRoute");
 app.use('/', DataJsonRoute);
 
+const NoteRoute = require("./routes/addNoteRoute");
+app.use('/', NoteRoute);
+
 app.listen(PORT,()=>{
     console.log(`Server is Started on PORT ${PORT}`)
 })
