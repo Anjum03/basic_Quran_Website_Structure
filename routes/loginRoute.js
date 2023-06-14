@@ -42,6 +42,7 @@ const randomstring = require('randomstring');
 //         //   isAdmin ? 'Admin logged in successfully' : 'User logged in successfully',
 //         });
 //       } catch (error) {
+//         console.log(error)
 //         res.status(500).json({ success: false, error: 'Server error' });
 //       }
 // });
@@ -233,101 +234,101 @@ router.post('/logout', async(req,res)=>{
 
 
 //Update User
-router.put('/update/:id', async(req,res)=>{
+// router.put('/update/:id', async(req,res)=>{
 
-    const userId = req.params.id ;
+//     const userId = req.params.id ;
 
-    const updateData = req.body ;
+//     const updateData = req.body ;
 
-    try {
-        const existingUser = await Login.findOne({ email: updateData.email });
+//     try {
+//         const existingUser = await Login.findOne({ email: updateData.email });
     
-        if (!existingUser) {
-          return res.status(400).json({ success: false, Msg: 'User Not Found' });
-        } else{
+//         if (!existingUser) {
+//           return res.status(400).json({ success: false, Msg: 'User Not Found' });
+//         } else{
 
-            if (existingUser && existingUser._id.toString() !== userId) {
-              return res.status(400).json({ success: false, Msg: 'Please Enter Unique Email-Id' });
-            }
+//             if (existingUser && existingUser._id.toString() !== userId) {
+//               return res.status(400).json({ success: false, Msg: 'Please Enter Unique Email-Id' });
+//             }
             
-            if( updateData.password ){
-                const salt = 10 
-                const newHashedPassword = await bcrypt.hash( updateData.password, salt);
-                updateData.password = newHashedPassword ;
-            }
+//             if( updateData.password ){
+//                 const salt = 10 
+//                 const newHashedPassword = await bcrypt.hash( updateData.password, salt);
+//                 updateData.password = newHashedPassword ;
+//             }
        
 
-            const updateUser = await Login.findByIdAndUpdate(userId, updateData, { new: true });
+//             const updateUser = await Login.findByIdAndUpdate(userId, updateData, { new: true });
         
-            res.status(200).json({ success: true, msg: 'User Update Successfully', data: updateUser });
+//             res.status(200).json({ success: true, msg: 'User Update Successfully', data: updateUser });
           
-        }
+//         }
 
-    } catch(error){
-        console.log(error)
-        res.status(500).json({ success: false, msg: `Server Error`})
-    }
+//     } catch(error){
+//         console.log(error)
+//         res.status(500).json({ success: false, msg: `Server Error`})
+//     }
 
-})
-
-
-
-//delete User
-router.delete('/delete/:id', async(req,res)=>{
-
-    try{
-
-        const deleteUser = await Login.findByIdAndDelete({_id: req.params.id});
-
-        if(!deleteUser){
-            res.status(400).json({ success: false, msg:` User Not Found`})
-        }
-
-        res.status(200).json({ success: true, msg:`User Deleted Successfully `  ,data: deleteUser})
-
-    } catch(error){
-        res.status(500).json({  success: false, msg: `Server Error :( )` })
-    }
-
-});
+// })
 
 
-//get all User
-router.get('/allUser', async(req,res)=>{
-    try{
 
-        const allUser = await Login.find();
+// //delete User
+// router.delete('/delete/:id', async(req,res)=>{
+
+//     try{
+
+//         const deleteUser = await Login.findByIdAndDelete({_id: req.params.id});
+
+//         if(!deleteUser){
+//             res.status(400).json({ success: false, msg:` User Not Found`})
+//         }
+
+//         res.status(200).json({ success: true, msg:`User Deleted Successfully `  ,data: deleteUser})
+
+//     } catch(error){
+//         res.status(500).json({  success: false, msg: `Server Error :( )` })
+//     }
+
+// });
+
+
+// //get all User
+// router.get('/allUser', async(req,res)=>{
+//     try{
+
+//         const allUser = await Login.find();
     
-        if(!allUser){
-            res.status(400).json({ success: false, msg: `User Not Found`});
-        }
+//         if(!allUser){
+//             res.status(400).json({ success: false, msg: `User Not Found`});
+//         }
     
-        res.status(200).json({ success: true, msg: `All User`, data: allUser});
+//         res.status(200).json({ success: true, msg: `All User`, data: allUser});
 
-    } catch(error){
-        res.status(500).json({success:false, msg:`Server Error`})
-    }
+//     } catch(error){
+//         res.status(500).json({success:false, msg:`Server Error`})
+//     }
 
-});
+// });
 
 
-//getById User
-router.get('/:id', async(req,res)=>{
+// //getById User
+// router.get('/:id', async(req,res)=>{
 
-    try{
+//     try{
 
-        const oneUser = await Login.findById({_id:req.params.id});
+//         const oneUser = await Login.findById({_id:req.params.id});
     
-        if(!oneUser){
-            res.status(400).json({success: false, msg:`User Not Found`});
-        }
+//         if(!oneUser){
+//             res.status(400).json({success: false, msg:`User Not Found`});
+//         }
     
-        res.status(200).json({success: true, msg: `GetByID User Here`, data: oneUser});
+//         res.status(200).json({success: true, msg: `GetByID User Here`, data: oneUser});
 
-    } catch(error){
-        res.status(500).json({success:false, msg:`Server Error`});
-    }
+//     } catch(error){
+//         res.status(500).json({success:false, msg:`Server Error`});
+//     }
 
-});
+// });
 
 module.exports = router ;
