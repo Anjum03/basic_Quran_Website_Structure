@@ -98,23 +98,23 @@ router.get('/QuranAudio/:dataId', async (req, res) => {
 
 
 //getById
-router.get('/quranAudio/:surahName/:ayahNumber/audio/:audioId', async (req, res) => {
+router.get('/quranAudio/:surahName/audio/:audioId', async (req, res) => {
 
   try {
     const surahName = req.params.surahName;
-    const ayahNumber = req.params.ayahNumber;
 
     const oneQuranAudio = req.params.audioId;
     // Find the Surah by surahName in the data from data.json
-    const surah = data.find((item) => item.transliteration === surahName);
+    const surah = DataJson.findOne(
+      {
+        surahName: DataJson.transliteration
+      }
+    );
 
     if (!surah) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
-    const verse = data.find((item) => item.ayahNumber === ayahNumber);
-    if (!verse) {
-      return res.status(400).json({ success: false, msg: 'Ayah Number Not Found' });
-    }
+    
     const singleQuranAudio = await QuranAudio.findById(oneQuranAudio);
     if (!oneQuranAudio) {
 
@@ -174,11 +174,10 @@ router.get('/quranAudio/:surahName/:ayahNumber/audio/:audioId', async (req, res)
 //   }
 // });
 
-router.post('/quranAudio/:dataId/:ayahNumber/audio', upload.single('audio'), async (req, res) => {
+router.post('/quranAudio/:dataId/audio', upload.single('audio'), async (req, res) => {
   try {
     const dataId = req.params.dataId;
-    const ayahNumber = parseInt(req.params.ayahNumber);
-    const { text } = req.body;
+    const { text , ayahNumber} = req.body;
 
     // Find the Surah by surahName in the data from data.json
     const surah = await DataJson.findById(dataId).exec();
@@ -186,9 +185,7 @@ router.post('/quranAudio/:dataId/:ayahNumber/audio', upload.single('audio'), asy
     if (!surah) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
-    if (surah.ayahNumber !== ayahNumber) {
-      return res.status(404).json({ success: false, msg: 'Verse not found' });
-    }
+    
 
     // let audio = await QuranAudio.findOne({ _id: dataId, ayahNumber });
 
@@ -216,12 +213,11 @@ router.post('/quranAudio/:dataId/:ayahNumber/audio', upload.single('audio'), asy
 
 
 //update QuranAudio
-router.put('/quranAudio/:dataId/:ayahNumber/audio/:audioId', upload.single('audio'),async (req, res) => {
+router.put('/quranAudio/:dataId/audio/:audioId', upload.single('audio'),async (req, res) => {
   try {
     const dataId = req.params.dataId;
-    const ayahNumber = (req.params.ayahNumber);
     const audioId = req.params.audioId;
-    const {text } = req.body;
+    const {text , ayahNumber} = req.body;
     // const { audioData } = req.body;
 
     // Find the Surah by surahName in the data from data.json
@@ -232,7 +228,7 @@ router.put('/quranAudio/:dataId/:ayahNumber/audio/:audioId', upload.single('audi
     }
 
 
-    let audioFind = await QuranAudio.findOne({ dataId, ayahNumber});
+    let audioFind = await QuranAudio.findOne({ dataId, });
 
      audioFind = await QuranAudio.findByIdAndUpdate(audioId , {
       $set:{
@@ -250,7 +246,6 @@ router.put('/quranAudio/:dataId/:ayahNumber/audio/:audioId', upload.single('audi
 
     // Update the hidaya fields
     audioFind.surahName = surah.transliteration;
-    audioFind.ayahNumber = surah.ayahNumber
 
     const audioUpdated = await audioFind.save();
     return res.status(200).json({ success: true, msg: 'Surah list Updated', data: audioUpdated });
@@ -263,11 +258,10 @@ router.put('/quranAudio/:dataId/:ayahNumber/audio/:audioId', upload.single('audi
 
 
 //delete QuranAudio
-router.delete('/quranAudio/:dataId/:ayahNumber/audio/:audioId', async (req, res) => {
+router.delete('/quranAudio/:dataId/audio/:audioId', async (req, res) => {
   try {
 
     const dataId = req.params.dataId;
-    const ayahNumber = parseInt(req.params.ayahNumber);
     const audioId = req.params.audioId;
 
     // Find the Surah by surahName in the data from data.json
@@ -278,10 +272,7 @@ router.delete('/quranAudio/:dataId/:ayahNumber/audio/:audioId', async (req, res)
     if (!surah) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
-    const verse = DataJson.find(dataId.ayahNumber);
-    if (!verse) {
-      return res.status(400).json({ success: false, msg: 'Ayah Number Not Found' });
-    }
+   
 
     const audioFind = await QuranAudio.findByIdAndDelete(audioId);
 
