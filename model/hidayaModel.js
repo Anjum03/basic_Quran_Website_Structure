@@ -7,10 +7,7 @@ const hidayaaSchema = new mongoose.Schema({
     type: String,
   },
   surahName: String,
-
-  ayahNumber: {
-    type: Number,
-  },
+  ayahNumber: {type: Number,},
   ayahWord: String,
   hidayaText: String,
   hidayaaAudio: String,

@@ -21,6 +21,7 @@ router.post('/:surahName/:hidayaId/addNote', async (req, res) => {
         }
 
         const hidyaa = await Hidayaa.findById(hidayaId);
+        const hidayaText = hidyaa.hidayaText;
 
         if (!hidyaa) {
             res.status(404).json({ success: false, msg: `Hidaya not present` });
@@ -29,8 +30,15 @@ router.post('/:surahName/:hidayaId/addNote', async (req, res) => {
         const addNote = await Note.create({
            surahName: surah.transliteration,
             hidayaId: hidayaId,
+            hidayaText: hidayaText,
             text: text
         });
+//to remove array in hidaya response
+        // const responseData = {
+        //     ...addNote._doc,
+        //     hidayaId: hidayaId,
+        //     transliteration: surah.transliteration
+        // };
 
         res.status(200).json({ success: true, msg: `Add Note Successfully`, data: addNote });
     } catch (error) {
@@ -56,7 +64,7 @@ router.put('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
         }
 
         const hidyaa = await Hidayaa.findById(hidayaId);
-
+        const hidayaText = hidyaa.hidayaText;
         if (!hidyaa) {
             res.status(404).json({ success: false, msg: `Hidaya not present` });
         }
@@ -65,6 +73,7 @@ router.put('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
             $set :{
                 surahName: surah.transliteration,
                 hidayaId : hidayaId,
+                hidayaText : hidayaText,
                 text : text
             }
         } , {new : true})

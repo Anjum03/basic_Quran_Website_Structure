@@ -46,6 +46,9 @@ app.use('/', DataJsonRoute);
 const NoteRoute = require("./routes/addNoteRoute");
 app.use('/', NoteRoute);
 
+const FavouriteRoute = require("./routes/favouriteRoute");
+app.use('/', FavouriteRoute);
+
 app.listen(PORT,()=>{
     console.log(`Server is Started on PORT ${PORT}`)
 })
