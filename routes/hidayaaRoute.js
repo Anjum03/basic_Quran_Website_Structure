@@ -32,6 +32,7 @@ router.get('/all/surahList', async (req, res) => {
         const hidayas = await Hidayaa.find({
           dataId : surah._id});
           return{
+            dataId : surah._id,
             surahName : surah.transliteration,
             hidayaCount : hidayas.length , 
             hidayas : hidayas.map((hidaya) => hidaya)

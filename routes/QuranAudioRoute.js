@@ -208,7 +208,6 @@ router.post('/quranAudio/:dataId/audio', upload.single('audio'), async (req, res
 
 
 
-
 //update QuranAudio
 router.put('/quranAudio/:dataId/audio/:audioId', upload.single('audio'),async (req, res) => {
   try {
@@ -242,7 +241,7 @@ router.put('/quranAudio/:dataId/audio/:audioId', upload.single('audio'),async (r
     }
 
     // Update the hidaya fields
-    audioFind.surahName = surah.transliteration;
+    // audioFind.surahName = surah.transliteration;
 
     const audioUpdated = await audioFind.save();
     return res.status(200).json({ success: true, msg: 'Surah list Updated', data: audioUpdated });
