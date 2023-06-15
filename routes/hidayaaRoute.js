@@ -180,15 +180,9 @@ router.get('/surahs/hidayas/:dataId', async (req, res) => {
   try {
     const dataId = req.params.dataId;
 
-    // Find the Surah by surahName in the data from data.json
-    // const surah = await Hidayaa.findOne({dataId : dataId});
+    const allHidayaa = await Hidayaa.find( { dataId : dataId})
 
-    // if (!surah) {
-    //   return res.status(404).json({ success: false, msg: 'Surah not found' });
-    // }
-    const allHidayaa = await Hidayaa.findOne({ dataId : dataId})
-
-    if (allHidayaa.length === 0) {
+    if (!allHidayaa) {
       return res.status(400).json({ success: false, msg: `No Data is present. Please add Data` })
     }
     return res.status(200).json({ success: true, msg: ` All Surah, Hidayaa and ayah `, data: allHidayaa });
