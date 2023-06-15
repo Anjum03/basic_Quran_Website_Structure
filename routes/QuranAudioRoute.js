@@ -98,23 +98,20 @@ router.get('/QuranAudio/:dataId', async (req, res) => {
 
 
 //getById
-router.get('/quranAudio/:surahName/audio/:audioId', async (req, res) => {
+router.get('/quranAudio/:dataId/audio/:audioId', async (req, res) => {
 
   try {
-    const surahName = req.params.surahName;
+    const dataId = req.params.dataId;
 
-    const oneQuranAudio = req.params.audioId;
-    // Find the Surah by surahName in the data from data.json
-    const surah = DataJson.findOne(
-      {
-        surahName: DataJson.transliteration
-      }
-    );
+    const quranAudio = await QuranAudio.findOne({ dataId: dataId });
 
-    if (!surah) {
+    if (!quranAudio) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
-    
+    const oneQuranAudio = req.params.audioId;
+    // Find the Surah by surahName in the data from data.json
+
+
     const singleQuranAudio = await QuranAudio.findById(oneQuranAudio);
     if (!oneQuranAudio) {
 
