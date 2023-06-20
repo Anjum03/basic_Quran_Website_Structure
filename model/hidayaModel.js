@@ -11,7 +11,7 @@ const hidayaaSchema = new mongoose.Schema({
   ayahWord: String,
   hidayaText: String,
   hidayaaAudio: String,
-  note : String,
+  noteText : String,
   isfavourite :Boolean ,
   hidayaaTag: {
     type: String,

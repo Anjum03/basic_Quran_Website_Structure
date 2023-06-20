@@ -3,7 +3,6 @@
 require('dotenv').config();
 const router = require('express').Router();
 const Note = require('../model/addNoteModel');
-const DataJson = require('../model/dataModel');
 const Hidayaa = require('../model/hidayaModel');
 const DeviceToken = require('../model/deviceModel');
 

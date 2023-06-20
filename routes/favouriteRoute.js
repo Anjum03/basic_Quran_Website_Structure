@@ -2,7 +2,6 @@
 require('dotenv').config();
 const router = require('express').Router();
 const Favourite = require('../model/favouriteModel');
-const DataJson = require('../model/dataModel');
 const Hidayaa = require('../model/hidayaModel');
 const DeviceToken = require('../model/deviceModel');
 // const multer = require('multer')

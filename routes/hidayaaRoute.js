@@ -2,7 +2,8 @@ require('dotenv').config();
 const router = require('express').Router();
 const Hidayaa = require('../model/hidayaModel');
 const DataJson = require('../model/dataModel');
-
+const Note = require('../model/addNoteModel');
+const Favourite = require('../model/favouriteModel');
 const cloudinary = require('cloudinary').v2;
 
 
@@ -15,11 +16,50 @@ cloudinary.config({
 
 //get all surah list
 // GET request to retrieve surah data including hidayas
-/* The above code is a route handler for a GET request to retrieve a list of Surahs from a database and
-their associated Hidayas. It first retrieves the Surahs from the database and then uses the Surah
-names to find the associated Hidayas. It then returns a response with the Surah details including
-the Surah ID, name, number of associated Hidayas, and an array of the associated Hidayas. */
-router.get('/all/surahList', async (req, res) => {
+
+//gaet all data if favourite present in db
+// router.get('/all/surahList', async (req, res) => {
+//   try {
+
+//     // Find the Surah by dataId in the data from data.json
+//     const surahs = await DataJson.find({}, { _id: 1, transliteration: 1, });
+
+//     if (!surahs) {
+//       return res.status(404).json({ success: false, msg: 'Surah not found' });
+//     }
+
+//     const note = await Note.findOne({noteText : Note.text})
+
+//   const isfavourite = await Favourite.find()
+
+
+//     const responseData = await Promise.all(
+//       surahs.map(async (surah) => {
+//         const hidayas = await Hidayaa.find({
+//           dataId: surah._id
+//         });
+//         return {
+//           dataId: surah._id,
+//           surahName: surah.transliteration,
+//           hidayaCount: hidayas.length,
+//           hidayas: hidayas.map((hidaya) => hidaya),
+//           noteText : note ? note.text : '',
+//           isfavourite : isfavourite ? isfavourite : false,
+//         }
+//       })
+//     )
+//     // Find hidayas associated with the surah
+
+
+//     res.status(200).json({ success: true, msg: 'Surah Details', surahData: responseData, });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ success: false, msg: 'Server Error' });
+//   }
+// });
+
+//if favourite have data show true and otherwise false 
+ router.get('/all/surahList', async (req, res) => {
   try {
 
     // Find the Surah by dataId in the data from data.json
@@ -28,6 +68,16 @@ router.get('/all/surahList', async (req, res) => {
     if (!surahs) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
+
+    const note = await Note.findOne({noteText : Note.text})
+
+    let isFavourite = false; // Initialize the isFavourite flag to false
+
+    const favouriteCount = await Favourite.countDocuments();
+    if (favouriteCount > 0) {
+      isFavourite = true; // Set the flag to true if there is data in the Favourite collection
+    }
+
 
     const responseData = await Promise.all(
       surahs.map(async (surah) => {
@@ -38,7 +88,10 @@ router.get('/all/surahList', async (req, res) => {
           dataId: surah._id,
           surahName: surah.transliteration,
           hidayaCount: hidayas.length,
-          hidayas: hidayas.map((hidaya) => hidaya)
+          hidayas: hidayas.map((hidaya) => hidaya),
+          noteText : note ? note.text : '',
+          isfavourite : isFavourite 
+
         }
       })
     )
@@ -90,7 +143,8 @@ router.post('/surahs/:dataId/hidayas', async (req, res) => {
       hidayaText,
       hidayaaTag,
       hidayaaAudio: audioUrl || undefined,
-      audio_public_id: audioPublicId || undefined
+      audio_public_id: audioPublicId || undefined ,
+      // noteText : Note.text
     });
 
     res.status(200).json({
@@ -208,7 +262,9 @@ router.get('/surahs/hidayas/:dataId', async (req, res) => {
     if (!allHidayaa) {
       return res.status(400).json({ success: false, msg: `No Data is present. Please add Data` })
     }
-    return res.status(200).json({ success: true, msg: ` All Surah, Hidayaa and ayah `, surahName: surah.transliteration, data: allHidayaa });
+    const note = await Note.findOne({noteText : Note.text})
+
+    return res.status(200).json({ success: true, msg: ` All Surah, Hidayaa and ayah `, surahName: surah.transliteration, data: allHidayaa , noteText : note.text});
 
   } catch (error) {
     console.log('Error occurred:', error);
