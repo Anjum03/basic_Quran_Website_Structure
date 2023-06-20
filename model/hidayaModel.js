@@ -11,10 +11,12 @@ const hidayaaSchema = new mongoose.Schema({
   ayahWord: String,
   hidayaText: String,
   hidayaaAudio: String,
+  note : String,
+  isfavourite :Boolean ,
   hidayaaTag: {
     type: String,
     enum: ['No-Tag', 'Tag'],
-    default: 'No-Tag',
+    default: 'Tag',
   },
 
 

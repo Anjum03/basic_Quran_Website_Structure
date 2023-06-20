@@ -5,42 +5,38 @@ const router = require('express').Router();
 const Note = require('../model/addNoteModel');
 const DataJson = require('../model/dataModel');
 const Hidayaa = require('../model/hidayaModel');
+const DeviceToken = require('../model/deviceModel');
 
 //add multer in future
 //add Note
-router.post('/:surahName/:hidayaId/addNote', async (req, res) => {
+router.post('/:hidayaId/addNote/:deviceToken', async (req, res) => {
 
-    const { surahName, hidayaId } = req.params;
+    const {  hidayaId , deviceToken } = req.params;
     const { text } = req.body;
     try {
 
-        const surah = await DataJson.findOne({ transliteration: surahName });
-
-        if (!surah) {
-            res.status(404).json({ success: false, msg: `SurahName not match` });
-        }
-
         const hidyaa = await Hidayaa.findById(hidayaId);
-        const hidayaText = hidyaa.hidayaText;
 
         if (!hidyaa) {
             res.status(404).json({ success: false, msg: `Hidaya not present` });
         }
 
+        const founDeviceToken = await DeviceToken.findOne({ deviceToken: deviceToken });
+
+        if (!founDeviceToken) {
+            res.status(404).json({ success: false, msg: `deviceToken not match` });
+        }
+
         const addNote = await Note.create({
-           surahName: surah.transliteration,
-            hidayaId: hidayaId,
-            hidayaText: hidayaText,
+            surahName: hidyaa.surahName,
+            deviceToken : hidyaa.deviceToken ,
+            hidayaId: hidyaa.hidayaId,
+            hidayaText: hidyaa.hidayaText,
             text: text
         });
-//to remove array in hidaya response
-        // const responseData = {
-        //     ...addNote._doc,
-        //     hidayaId: hidayaId,
-        //     transliteration: surah.transliteration
-        // };
 
-        res.status(200).json({ success: true, msg: `Add Note Successfully`, data: addNote });
+
+        res.status(200).json({ success: true, msg: `Add Note Successfully`,deviceToken: founDeviceToken.deviceToken, data: addNote });
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, msg: 'Server Error' })
@@ -51,17 +47,11 @@ router.post('/:surahName/:hidayaId/addNote', async (req, res) => {
 
 
 //update 
-router.put('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
+router.put('/:hidayaId/:deviceToken/:addNoteId', async (req, res) => {
 
-    const { surahName, hidayaId , addNoteId} = req.params;
+    const { deviceToken, hidayaId , addNoteId} = req.params;
     const { text } = req.body;
     try {
-
-        const surah = await DataJson.findOne({ transliteration: surahName });
-
-        if (!surah) {
-            res.status(404).json({ success: false, msg: `SurahName not match` });
-        }
 
         const hidyaa = await Hidayaa.findById(hidayaId);
         const hidayaText = hidyaa.hidayaText;
@@ -69,16 +59,22 @@ router.put('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
             res.status(404).json({ success: false, msg: `Hidaya not present` });
         }
 
+        const founDeviceToken = await DeviceToken.findOne({ deviceToken: deviceToken });
+
+        if (!founDeviceToken) {
+            res.status(404).json({ success: false, msg: `deviceToken not match` });
+        }
+
         const updateNote = await Note.findByIdAndUpdate( addNoteId , {
             $set :{
-                surahName: surah.transliteration,
+               deviceToken :deviceToken,
                 hidayaId : hidayaId,
                 hidayaText : hidayaText,
                 text : text
             }
         } , {new : true})
 
-        res.status(200).json({ success: true, msg: `Add Note Successfully`, data: updateNote });
+        res.status(200).json({ success: true, msg: `Add Note Successfully`, deviceToken : founDeviceToken, data: updateNote });
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, msg: 'Server Error' })
@@ -90,27 +86,27 @@ router.put('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
 
 
 //delete
-router.delete('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
+router.delete('/:hidayaId/:deviceToken/:addNoteId', async (req, res) => {
 
-    const { surahName, hidayaId , addNoteId} = req.params;
-    const { text } = req.body;
+    const { deviceToken, hidayaId , addNoteId} = req.params;
     try {
-
-        const surah = await DataJson.findOne({ transliteration: surahName });
-
-        if (!surah) {
-            res.status(404).json({ success: false, msg: `SurahName not match` });
-        }
 
         const hidyaa = await Hidayaa.findById(hidayaId);
 
         if (!hidyaa) {
             res.status(404).json({ success: false, msg: `Hidaya not present` });
         }
+        
+        const founDeviceToken = await DeviceToken.findOne({ deviceToken: deviceToken });
+
+        if (!founDeviceToken) {
+            res.status(404).json({ success: false, msg: `deviceToken not match` });
+        }
 
         const deleteNote = await Note.findByIdAndDelete(addNoteId)
 
-        res.status(200).json({ success: true, msg: `Add Note Successfully`, data: deleteNote });
+        res.status(200).json({ success: true, msg: `Add Note Successfully`,
+        deviceToken : founDeviceToken, data: deleteNote });
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, msg: 'Server Error' })
@@ -122,16 +118,10 @@ router.delete('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
 
 
 //get by Id 
-router.get('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
+router.get('/:hidayaId/:deviceToken/:addNoteId', async (req, res) => {
 
-    const { surahName, hidayaId , addNoteId} = req.params;
+    const { deviceToken, hidayaId , addNoteId} = req.params;
     try {
-
-        const surah = await DataJson.findOne({ transliteration: surahName });
-
-        if (!surah) {
-            res.status(404).json({ success: false, msg: `SurahName not match` });
-        }
 
         const hidyaa = await Hidayaa.findById(hidayaId);
 
@@ -139,9 +129,15 @@ router.get('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
             res.status(404).json({ success: false, msg: `Hidaya not present` });
         }
 
+        const founDeviceToken = await DeviceToken.findOne({ deviceToken: deviceToken });
+
+        if (!founDeviceToken) {
+            res.status(404).json({ success: false, msg: `deviceToken not match` });
+        }
+
         const deleteNote = await Note.findById(addNoteId)
 
-        res.status(200).json({ success: true, msg: `Add Note Successfully`, data: deleteNote });
+        res.status(200).json({ success: true, msg: `Add Note Successfully`, deviceToken : founDeviceToken, data: deleteNote });
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, msg: 'Server Error' })
@@ -152,26 +148,20 @@ router.get('/:surahName/:hidayaId/addNote/:addNoteId', async (req, res) => {
 
 
 //get All
-router.get('/:surahName/:hidayaId/addNote', async (req, res) => {
+router.get('/:deviceToken/addNote', async (req, res) => {
 
-    const { surahName, hidayaId } = req.params;
+    const { deviceToken } = req.params;
     try {
 
-        const surah = await DataJson.findOne({ transliteration: surahName });
+        const founDeviceToken = await DeviceToken.findOne({ deviceToken: deviceToken });
 
-        if (!surah) {
-            res.status(404).json({ success: false, msg: `SurahName not match` });
+        if (!founDeviceToken) {
+            res.status(404).json({ success: false, msg: `deviceToken not match` });
         }
-
-        const hidyaa = await Hidayaa.findById(hidayaId);
-
-        if (!hidyaa) {
-            res.status(404).json({ success: false, msg: `Hidaya not present` });
-        }
-
+      
         const deleteNote = await Note.find()
 
-        res.status(200).json({ success: true, msg: `Add Note Successfully`, data: deleteNote });
+        res.status(200).json({ success: true, msg: `Add Note Successfully`, deviceToken : founDeviceToken, data: deleteNote });
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, msg: 'Server Error' })

@@ -4,6 +4,7 @@ const app = require('express')();
 const PORT = process.env.PORT || 3001 ;
 
 
+
 //DB connection
 const connectDB = require("./middleware/dbConnections");
 connectDB();
@@ -22,6 +23,10 @@ app.use(bodyParser.urlencoded({extended:true}));
 const morgan = require('morgan');
 app.use(morgan('combined'));
 
+const fileUpload = require('express-fileupload');
+app.use(fileUpload({
+    useTempFiles: true,
+}))
 
 //routing
 
@@ -48,6 +53,9 @@ app.use('/', NoteRoute);
 
 const FavouriteRoute = require("./routes/favouriteRoute");
 app.use('/', FavouriteRoute);
+
+const imgHidayaaRoute = require("./routes/imgHidayaaRoute");
+app.use('/', imgHidayaaRoute);
 
 app.listen(PORT,()=>{
     console.log(`Server is Started on PORT ${PORT}`)

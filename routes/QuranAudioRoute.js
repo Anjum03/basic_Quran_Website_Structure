@@ -1,5 +1,3 @@
-
-
 require('dotenv').config();
 const router = require('express').Router();
 const Hidayaa = require('../model/hidayaModel');
@@ -9,9 +7,18 @@ const multer = require('multer')
 
 const storage = multer.memoryStorage();
 const upload = multer({
-  storage : storage
+  storage: storage
 });
 
+
+// cloudinary
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET
+});
 // to get all surahName and Ayat No  // first Page
 
 router.get('/all/AyahList', async (req, res) => {
@@ -27,6 +34,7 @@ router.get('/all/AyahList', async (req, res) => {
       surahs.map(async (surah) => {
         const ayahs = await QuranAudio.find({ dataId: surah._id });
         return {
+          dataId: surah._id,
           surahName: surah.transliteration,
           ayahCount: surah.ayahNumber,
           ayahs: ayahs.map((ayah) => ayah),
@@ -81,23 +89,23 @@ router.get('/all/AyahList', async (req, res) => {
 router.get('/QuranAudio/:dataId', async (req, res) => {
   try {
     const dataId = req.params.dataId;
+    const quranAudio = await QuranAudio.find({ dataId: dataId });
 
-    const quranAudio = await QuranAudio.findOne({ dataId: dataId });
+    const surah = await DataJson.findOne({ _id: dataId });
+    console.log(surah);
 
-    if (quranAudio.length === 0) {
-      return res.status(400).json({ success: false, msg: 'No Quran Audio list' });
-    }
+    //if (quranAudio.length > 0) {
+    // return res.status(200).json({ success: true, msg: 'Quran Audio list', surahName: surahName, data: quranAudio });
 
-    return res.status(200).json({ success: true, msg: 'Quran Audio list', data: quranAudio });
+    // }
+    return res.status(200).json({ success: true, msg: 'Quran Audio list', surahName: surah.transliteration, data: quranAudio });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, msg: 'Server Error' });
   }
 });
 
-
-
-//getById
 router.get('/quranAudio/:dataId/audio/:audioId', async (req, res) => {
 
   try {
@@ -112,6 +120,40 @@ router.get('/quranAudio/:dataId/audio/:audioId', async (req, res) => {
     // Find the Surah by surahName in the data from data.json
 
 
+    const singleQuranAudio = await QuranAudio.findById(oneQuranAudio);
+    if (!oneQuranAudio) {
+
+      return res.status(400).json({ success: false, msg: ` No Quran Audio list  `, });
+    }
+    return res.status(200).json({ success: true, msg: ` All Surah, Hidayaa and ayah `, data: singleQuranAudio });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, msg: `Server Error ` })
+  }
+
+})
+
+
+
+//getById
+router.get('/quranAudio/:surahName/:ayahNumber/audio/:audioId', async (req, res) => {
+
+  try {
+    const surahName = req.params.surahName;
+    const ayahNumber = req.params.ayahNumber;
+
+    const oneQuranAudio = req.params.audioId;
+    // Find the Surah by surahName in the data from data.json
+    const surah = data.find((item) => item.transliteration === surahName);
+
+    if (!surah) {
+      return res.status(404).json({ success: false, msg: 'Surah not found' });
+    }
+    const verse = data.find((item) => item.ayahNumber === ayahNumber);
+    if (!verse) {
+      return res.status(400).json({ success: false, msg: 'Ayah Number Not Found' });
+    }
     const singleQuranAudio = await QuranAudio.findById(oneQuranAudio);
     if (!oneQuranAudio) {
 
@@ -152,8 +194,8 @@ router.get('/quranAudio/:dataId/audio/:audioId', async (req, res) => {
 //     //  if (ayahNumber < 1 || ayahNumber > surah.ayahNumber) {
 //     //   return res.status(400).json({ success: false, msg: 'Invalid Ayah Number' });
 //     // }
-    
-   
+
+
 
 //     const audioList = await QuranAudio.create({
 //       dataId: dataId,
@@ -171,10 +213,23 @@ router.get('/quranAudio/:dataId/audio/:audioId', async (req, res) => {
 //   }
 // });
 
-router.post('/quranAudio/:dataId/audio', upload.single('audio'), async (req, res) => {
+router.post('/quranAudio/:dataId/audio', async (req, res) => {
+
+  let audioUrl, audioPublicId;
+
+  // Check if hidayaaAudio file exists in the request
+  if (req.files && req.files.audio) {
+    const result = await cloudinary.uploader.upload(req.files.audio.tempFilePath, {
+      resource_type: 'video',
+      resource_type: 'auto'
+    });
+
+    audioUrl = result.url;
+    audioPublicId = result.public_id;
+  }
   try {
     const dataId = req.params.dataId;
-    const { text , ayahNumber} = req.body;
+    const { text, ayahNumber } = req.body;
 
     // Find the Surah by surahName in the data from data.json
     const surah = await DataJson.findById(dataId).exec();
@@ -182,7 +237,9 @@ router.post('/quranAudio/:dataId/audio', upload.single('audio'), async (req, res
     if (!surah) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
-    
+    // if (surah.ayahNumber !== ayahNumber) {
+    //   return res.status(404).json({ success: false, msg: 'Verse not found' });
+    // }
 
     // let audio = await QuranAudio.findOne({ _id: dataId, ayahNumber });
 
@@ -195,10 +252,11 @@ router.post('/quranAudio/:dataId/audio', upload.single('audio'), async (req, res
       ayahNumber: ayahNumber,
       surahName: surah.transliteration,
       text: text,
-      audio: req.file.originalname
+      audio: audioUrl || undefined,
+      audio_public_id: audioPublicId || undefined
     });
 
-    return res.status(200).json({ success: true, msg: 'Audio list created', data: { dataId, ...audio.toJSON() } });
+    return res.status(200).json({ success: true, msg: 'Audio list created', data: { dataId, /*...*/audio/*.toJSON()*/ } });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ success: false, msg: 'Server Error' });
@@ -208,12 +266,25 @@ router.post('/quranAudio/:dataId/audio', upload.single('audio'), async (req, res
 
 
 
+
 //update QuranAudio
-router.put('/quranAudio/:dataId/audio/:audioId', upload.single('audio'),async (req, res) => {
+router.put('/quranAudio/:dataId/audio/:audioId', async (req, res) => {
+  let audioUrl, audioPublicId;
+
+  // Check if hidayaaAudio file exists in the request
+  if (req.files && req.files.audio) {
+    const result = await cloudinary.uploader.upload(req.files.audio.tempFilePath, {
+      resource_type: 'video',
+      resource_type: 'auto'
+    });
+
+    audioUrl = result.url;
+    audioPublicId = result.public_id;
+  }
   try {
     const dataId = req.params.dataId;
     const audioId = req.params.audioId;
-    const {text , ayahNumber} = req.body;
+    const { text, ayahNumber } = req.body;
     // const { audioData } = req.body;
 
     // Find the Surah by surahName in the data from data.json
@@ -224,17 +295,18 @@ router.put('/quranAudio/:dataId/audio/:audioId', upload.single('audio'),async (r
     }
 
 
-    let audioFind = await QuranAudio.findOne({ dataId, });
+    let audioFind = await QuranAudio.findOne({ dataId, ayahNumber });
 
-     audioFind = await QuranAudio.findByIdAndUpdate(audioId , {
-      $set:{
+    audioFind = await QuranAudio.findByIdAndUpdate(audioId, {
+      $set: {
         dataId: dataId,
-        surahName: surah.transliteration,
         ayahNumber: ayahNumber,
+        surahName: surah.transliteration,
         text: text,
-        audio:req.file.originalname ,
+        audio: audioUrl || undefined,
+        audio_public_id: audioPublicId || undefined
       }
-    }, {new : true});
+    }, { new: true });
 
     if (!audioFind) {
       return res.status(404).json({ success: false, msg: 'Audio not found' });
@@ -242,6 +314,7 @@ router.put('/quranAudio/:dataId/audio/:audioId', upload.single('audio'),async (r
 
     // Update the hidaya fields
     // audioFind.surahName = surah.transliteration;
+    // audioFind.ayahNumber = surah.ayahNumbresult.urlresult.urlresult.urler
 
     const audioUpdated = await audioFind.save();
     return res.status(200).json({ success: true, msg: 'Surah list Updated', data: audioUpdated });
@@ -268,12 +341,15 @@ router.delete('/quranAudio/:dataId/audio/:audioId', async (req, res) => {
     if (!surah) {
       return res.status(404).json({ success: false, msg: 'Surah not found' });
     }
-   
+
 
     const audioFind = await QuranAudio.findByIdAndDelete(audioId);
 
     if (!audioFind) {
       return res.status(404).json({ success: false, msg: 'Audio not found' });
+    }
+    if (audioFind.audio_public_id) {
+      await cloudinary.uploader.destroy(audioFind.audio_public_id);
     }
 
     res.status(200).json({ success: true, msg: `Audio Deleted`, data: audioFind })
