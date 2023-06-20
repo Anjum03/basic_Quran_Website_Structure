@@ -264,7 +264,16 @@ router.get('/surahs/hidayas/:dataId', async (req, res) => {
     }
     const note = await Note.findOne({noteText : Note.text})
 
-    return res.status(200).json({ success: true, msg: ` All Surah, Hidayaa and ayah `, surahName: surah.transliteration, data: allHidayaa , noteText : note.text});
+    let isFavourite = false; // Initialize the isFavourite flag to false
+
+    const favouriteCount = await Favourite.countDocuments();
+    if (favouriteCount > 0) {
+      isFavourite = true; // Set the flag to true if there is data in the Favourite collection
+    }
+
+    return res.status(200).json({ success: true, msg: ` All Surah, Hidayaa and ayah `,
+     surahName: surah.transliteration, data: allHidayaa ,  noteText : note ? note.text : '',
+    isFavourite :isFavourite });
 
   } catch (error) {
     console.log('Error occurred:', error);
