@@ -3,8 +3,15 @@ const router = require('express').Router();
 const Hidayaa = require('../model/hidayaModel');
 const DataJson = require('../model/dataModel');
 
-const cloudinary = require("../cloudinary");
-const upload = require("../multer");
+const cloudinary = require('cloudinary').v2;
+
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+// const upload = require("../multer");
 
 //get all surah list
 // GET request to retrieve surah data including hidayas

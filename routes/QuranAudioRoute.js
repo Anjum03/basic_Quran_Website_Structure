@@ -92,12 +92,12 @@ router.get('/QuranAudio/:dataId', async (req, res) => {
     const quranAudio = await QuranAudio.find({ dataId: dataId });
 
     const surah = await DataJson.findOne({ _id: dataId });
-    console.log(surah);
 
-    //if (quranAudio.length > 0) {
-    // return res.status(200).json({ success: true, msg: 'Quran Audio list', surahName: surahName, data: quranAudio });
+    if (!surah) {
+      // If surah is not found, return an error response
+      return res.status(404).json({ success: false, msg: 'Surah not found' });
+    }
 
-    // }
     return res.status(200).json({ success: true, msg: 'Quran Audio list', surahName: surah.transliteration, data: quranAudio });
 
   } catch (error) {
@@ -105,6 +105,7 @@ router.get('/QuranAudio/:dataId', async (req, res) => {
     res.status(500).json({ success: false, msg: 'Server Error' });
   }
 });
+
 
 router.get('/quranAudio/:dataId/audio/:audioId', async (req, res) => {
 
